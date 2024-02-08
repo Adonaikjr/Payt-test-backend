@@ -23,6 +23,14 @@ class UrlDestinoRequestValidade extends FormRequest
                 'url',
                 'different:' . url('/'),
                 function ($attribute, $value, $fail) {
+                    parse_str(parse_url($value, PHP_URL_QUERY), $queryParams);
+
+                    foreach ($queryParams as $key => $param) {
+                        if ($param === '') {
+                            $fail('A URL de destino não pode conter query params com valores vazios.');
+                        }
+                    }
+                    
                     if (parse_url($value, PHP_URL_SCHEME) !== 'https') {
                         $fail('A URL de destino deve ser HTTPS.');
                     }

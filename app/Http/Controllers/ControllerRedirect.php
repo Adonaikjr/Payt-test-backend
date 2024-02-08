@@ -4,30 +4,68 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateRedirectRequestValidade;
 use App\Http\Requests\UrlDestinoRequestValidade;
+use App\Models\table_redirectLog;
 use App\Models\table_redirects;
 use Illuminate\Http\Request;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 
 class ControllerRedirect extends Controller
 {
-    public function redirectTest($redirect)
+    private function Logs($request, $redirect_id)
     {
-        $hashids = new Hashids();
+        try {
+            $checkParamsEmpty = $request->query();
+            $queryNoEmpty = [];
 
-        $id = $hashids->encode(1, 2, 3);
+            foreach ($checkParamsEmpty as $key => $value) {
+                if (!empty($value)) {
+                    $queryNoEmpty[$key] = $value;
+                }
+            }
 
+            table_redirectLog::create([
+                'redirect_id' => $redirect_id,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'referer' => $request->header('referer'),
+                'query_params' =>json_encode($queryNoEmpty),
+                'date_time_acess' => now(),
+            ]);
+            $LatestAcess = table_redirects::findOrFail($redirect_id);
+            $LatestAcess->update(['ultimo_acesso' => now()]);
 
-        return response()->json([
-            'redirect' => $redirect,
-            'code' => $id,
-        ]);
+            return $queryNoEmpty;
+        } catch (\Exception $e) {
+            Log::error('Erro ao interno: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao conectar com banco'], 500);
+        }
+    }
+    public function redirectGo(Request $req, $redirect)
+    {
+        // dd($req->query);
+        try {
+            $codigo = $redirect;
+
+            $GetLink = table_redirects::where('codigo', $codigo)->first();
+
+            $RegisterLog = $this->Logs($req, $GetLink->id);
+
+            $GoRedirect = fn ($GetLink) => $GetLink->status === 0
+                ? response()->json(['error' => 'Status está desativado'], 400)
+                : redirect()->away($GetLink->url_destino);
+
+            return $GoRedirect($GetLink);
+        } catch (\Exception $e) {
+            Log::error('Erro ao interno: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao conectar com banco ou link deletado'], 500);
+        }
     }
 
     public function createRedirect(UrlDestinoRequestValidade  $req)
     {
-
         try {
             $urlDestinoSave = $req->url_destino;
 
@@ -45,10 +83,7 @@ class ControllerRedirect extends Controller
 
             return response()->json($Destino, 201);
         } catch (\Exception $e) {
-            //   Se ocorrer uma exceção, registre-a nos logs
-            Log::error('Erro ao enviar a url_destino ao banco: ' . $e->getMessage());
-
-            //   Retorne uma resposta de erro para o cliente
+            Log::error('Erro interno: ' . $e->getMessage());
             return response()->json(['error' => 'Erro ao conectar com banco'], 500);
         }
     }
@@ -69,9 +104,47 @@ class ControllerRedirect extends Controller
 
             return response()->json(['sucesso' => 'Atualizado com sucesso'], 200);
         } catch (\Exception $e) {
-
             Log::error('Erro ao enviar a dados ao banco: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao conectar com banco'], 500);
+        }
+    }
 
+    public function getListAllRedirect()
+    {
+        try {
+            $GetAll = table_redirects::all();
+
+            return response()->json($GetAll, 200);
+        } catch (\Exception $e) {
+            Log::error('Erro ao interno: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao conectar com banco'], 500);
+        }
+    }
+
+    public function deleteRedirect(Request $req)
+    {
+        try {
+            $Delete = table_redirects::where('codigo', $req->codigo)->first();
+            $Delete->update(['status' => false]);
+            $Delete->delete();
+
+            return response()->json(['sucesso' => 'Deletado com sucesso'], 200);
+        } catch (\Exception $e) {
+            Log::error('Erro interno: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao conectar com banco'], 500);
+        }
+    }
+
+    public function restoreRedirect($codigo)
+    {
+        try {
+            $Restore = table_redirects::withTrashed()->findOrFail($codigo);
+            $Restore->update(['status' => true]);
+            $Restore->restore();
+
+            return response()->json(['sucesso' => 'Restaurado com sucesso'], 200);
+        } catch (\Exception $e) {
+            Log::error('Erro interno: ' . $e->getMessage());
             return response()->json(['error' => 'Erro ao conectar com banco'], 500);
         }
     }
