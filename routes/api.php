@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ControllerRedirect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/r/{redirect}', [ControllerRedirect::class, 'redirectTest'])->name('redirectTest');
+Route::post('redirects', [ControllerRedirect::class, 'createRedirect'])->name('createRedirect');
+Route::put('redirects', [ControllerRedirect::class, 'updateRedirect'])->name('updateRedirect');
