@@ -30,15 +30,12 @@ class ControllerRedirectLog extends Controller
                 ->count();
             $IpUnico = $buscarIpUnico();
 
-
             $buscarTopReferer = fn() => table_redirectLog::select('referer', \DB::raw('COUNT(*) as total'))
                 ->where('redirect_id', $Codigo->id)
                 ->groupBy('referer')
                 ->orderByDesc('total')
                 ->first();
             $TopReferer = $buscarTopReferer();
-
-
 
             $ultimosDezDias = \Carbon\Carbon::today()->subDays(9);
 

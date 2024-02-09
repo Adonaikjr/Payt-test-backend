@@ -22,16 +22,16 @@ Esse documento visa coletar feedbacks sobre o teste de desenvolvimento. Desde o 
 ## Após o Teste
 
 1 - O que você achou do teste?
-> Resposta
+> Um teste bem interessante, aonde eu coloquei alguns conhecimentos em prática sobre testes automatizados e redirecionamentos que era algo que nunca tinha feito, achei um teste super legal e bem elaborado!.
 
 2 - Levou mais ou menos tempo do que você esperava?
-> Resposta
+> Demorou um pouco mais de tempo, pois tive um tempo de pesquisa sobre os testes e pensando alguma forma de enviar ips, referer, diferentes para conseguir testar, estimei 12hrs e o projeto foi concluido em 19hrs 52min pelos dados do wakatime.
 
 3 - Teve imprevistos? Quais?
-> Resposta
+> Não tive imprevistos, foi só questão de tempo mesmo.
 
 4 - Existem pontos que você gostaria de ter melhorado?
-> Resposta
+> Não, dei meu melhor no teste e creio que está de acordo com o que foi solicitado, mas eu gostaria de ter entendido o projeto mais rápido, por nunca ter feito nada parecido eu demorei um tempo lendo o README.
 
 5 - Quais falhas você encontrou na estrutura do projeto?
-> Resposta
+> Pelo que me lembre não encontrei nenhuma, aparenta ser um projeto base de laravel.

@@ -69,7 +69,6 @@ class ControllerRedirect extends Controller
 
             $newUrlQuery = $transformUrl($hasQueryParams, $req, $GetLink);
 
-
             $GoRedirect = fn($GetLink) => $GetLink->status === 0
                 ? response()->json(['error' => 'Status está desativado'], 400)
                 : redirect()->away($newUrlQuery);
@@ -152,10 +151,11 @@ class ControllerRedirect extends Controller
         }
     }
 
-    public function restoreRedirect($codigo)
+    public function restoreRedirect(Request $req)
     {
+        //Envie um objeto {"codigo": "codigo que deseja deletar"}
         try {
-            $Restore = table_redirects::withTrashed()->findOrFail($codigo);
+            $Restore = table_redirects::withTrashed()->findOrFail($req->codigo);
             $Restore->update(['status' => true]);
             $Restore->restore();
 
