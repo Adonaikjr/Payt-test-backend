@@ -46,7 +46,7 @@ class RedirectsTest extends TestCase
             return $this->generateValidUrl();
         }
     }
-    public function teste_espero_status_200_url_destino()
+    public function teste_espero_status_201_url_destino()
     {
         $urlDestino = $this->generateValidUrl();
 

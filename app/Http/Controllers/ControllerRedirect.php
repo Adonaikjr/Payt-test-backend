@@ -31,7 +31,7 @@ class ControllerRedirect extends Controller
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'referer' => $request->header('referer'),
-                'query_params' =>json_encode($queryNoEmpty),
+                'query_params' => json_encode($queryNoEmpty),
                 'date_time_acess' => now(),
             ]);
             $LatestAcess = table_redirects::findOrFail($redirect_id);
@@ -45,7 +45,7 @@ class ControllerRedirect extends Controller
     }
     public function redirectGo(Request $req, $redirect)
     {
-        // dd($req->query);
+        //dd($req->query);
         try {
             $codigo = $redirect;
 
@@ -53,9 +53,26 @@ class ControllerRedirect extends Controller
 
             $RegisterLog = $this->Logs($req, $GetLink->id);
 
-            $GoRedirect = fn ($GetLink) => $GetLink->status === 0
+            $hasQueryParams = strpos($GetLink->url_destino, '?') !== false;
+
+            $transformUrl = function ($hasQueryParams, $req, $GetLink) {
+                if ($hasQueryParams) {
+                    $checkQueryUsuario = $req->query();
+                    if ($checkQueryUsuario) {
+                        $queryString = http_build_query($checkQueryUsuario);
+                        $newUrl = $GetLink->url_destino . '&' . $queryString;
+                        return $newUrl;
+                    }
+                }
+                return $GetLink->url_destino;
+            };
+
+            $newUrlQuery = $transformUrl($hasQueryParams, $req, $GetLink);
+
+
+            $GoRedirect = fn($GetLink) => $GetLink->status === 0
                 ? response()->json(['error' => 'Status está desativado'], 400)
-                : redirect()->away($GetLink->url_destino);
+                : redirect()->away($newUrlQuery);
 
             return $GoRedirect($GetLink);
         } catch (\Exception $e) {
@@ -64,7 +81,7 @@ class ControllerRedirect extends Controller
         }
     }
 
-    public function createRedirect(UrlDestinoRequestValidade  $req)
+    public function createRedirect(UrlDestinoRequestValidade $req)
     {
         try {
             $urlDestinoSave = $req->url_destino;

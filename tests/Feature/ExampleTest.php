@@ -95,4 +95,68 @@ class ExampleTest extends TestCase
 
         $buscandoEstatisticas($codigoGerado);
     }
+
+    public function teste_validade_query()
+    {
+
+        $data = [
+            'url_destino' => 'https://google.com?src=facebook',
+        ];
+
+        $response = $this->post('/api/redirects', $data);
+        $codigoGerado = $response->json('codigo');
+
+        $gerandoStatisticas = function ($codigo) {
+            $response = $this->get('/r/' . $codigo);
+
+            // Verifica se a resposta é um redirecionamento
+            $response->assertRedirect();
+
+            // Extrai os parâmetros de consulta da URL de redirecionamento
+            $queryParams = collect(parse_url($response->headers->get('Location'))['query'] ?? '')
+                ->map(function ($param) {
+                    return explode('=', $param);
+                })
+                ->pluck(1, 0)
+                ->toArray();
+
+            // Verifica se os parâmetros de consulta esperados estão presentes na URL de redirecionamento
+            $this->assertArrayHasKey('src', $queryParams);
+            $this->assertEquals('facebook', $queryParams['src']);
+
+            // Retorna a resposta
+            return $response;
+        };
+
+        // Cenário 2: URL de destino sem parâmetros de consulta
+        $data2 = [
+            'url_destino' => 'https://google.com',
+        ];
+
+        $response2 = $this->post('/api/redirects', $data2);
+        $codigoGerado2 = $response2->json('codigo');
+
+        $gerandoStatisticas2 = function ($codigo) {
+            $response = $this->get('/r/' . $codigo);
+
+            // Verifica se a resposta é um redirecionamento
+            $response->assertRedirect();
+
+            // Extrai os parâmetros de consulta da URL de redirecionamento
+            $queryParams = collect(parse_url($response->headers->get('Location'))['query'] ?? '')
+                ->map(function ($param) {
+                    return explode('=', $param);
+                })
+                ->pluck(1, 0)
+                ->toArray();
+
+            // Verifica se não há parâmetros de consulta na URL de redirecionamento
+            $this->assertEmpty($queryParams);
+
+            // Retorna a resposta
+            return $response;
+        };
+        $gerandoStatisticas($codigoGerado);
+
+    }
 }
