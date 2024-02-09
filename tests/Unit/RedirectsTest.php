@@ -63,26 +63,27 @@ class RedirectsTest extends TestCase
     {
         // Caso 1: URL com DNS inválido
         $response = $this->postJson('api/redirects', ['url_destino' => 'https://invalid-dns-url.com']);
-        $response->assertStatus(422); 
+        $response->assertStatus(422);
 
         // Caso 2: URL inválida
         $response = $this->postJson('api/redirects', ['url_destino' => 'invalid-url']);
-        $response->assertStatus(422); 
+        $response->assertStatus(422);
 
         // Caso 3: URL apontando para a própria aplicação
         $response = $this->postJson('api/redirects', ['url_destino' => url('/api/redirects')]);
-        $response->assertStatus(422); 
+        $response->assertStatus(422);
 
         // Caso 4: URL sem HTTPS
         $response = $this->postJson('api/redirects', ['url_destino' => 'http://example.com']);
-        $response->assertStatus(422); 
+        $response->assertStatus(422);
 
         // Caso 5: URL retornando status diferente de 200 ou 201
         $response = $this->postJson('api/redirects', ['url_destino' => 'https://example.com/404']);
-        $response->assertStatus(422); 
+        $response->assertStatus(422);
 
         // Caso 6: URL inválida pois possui query params com chave vazia
         $response = $this->postJson('api/redirects', ['url_destino' => 'https://example.com/?key=']);
-        $response->assertStatus(422); 
+        $response->assertStatus(422);
     }
+
 }

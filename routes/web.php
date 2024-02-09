@@ -2,7 +2,7 @@
 
 // use App\Http\Controllers\ControllerRedirect;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ControllerRedirect;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,3 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/r/{redirect}', [ControllerRedirect::class, 'redirectGo'])->name('redirectGo');

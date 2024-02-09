@@ -18,7 +18,7 @@ class ControllerRedirectLog extends Controller
     public function statisticsLog($redirect)
     {
         try {
-            $pegarCodigo = fn($redirect) => table_redirects::where('codigo', $redirect)->first();
+            $pegarCodigo = fn($codigo) => table_redirects::where('codigo', $codigo)->first();
             $Codigo = $pegarCodigo($redirect);
 
             $pegarChaveCorrespondente = fn() => table_redirectLog::where('redirect_id', $Codigo->id);
@@ -76,5 +76,25 @@ class ControllerRedirectLog extends Controller
             return response()->json(['error' => 'Erro ao conectar com banco'], 500);
         }
 
+    }
+
+    public function logsAcess($redirect){
+        try {
+            $buscarCodigo = fn($codigo) => table_redirects::where('codigo', $codigo)->first();
+            $checkCodigo = $buscarCodigo($redirect);
+
+            if(!$checkCodigo){
+                return response()->json(['error' => 'Não foi encontrado o código solicitado'], 400);
+            }
+
+            $buscarKey = fn($chave) => table_redirectLog::where('redirect_id', $chave)->get();
+
+            $LogsTotal = $buscarKey($checkCodigo->id);
+
+            return response()->json($LogsTotal);
+            //code...
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }
